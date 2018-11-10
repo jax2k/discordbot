@@ -1,3 +1,4 @@
+const helper = require('./helper.js');
 const config = require('config.json')('./config.json');
 if (process.argv.length <= 2) {
   console.log('Invalid arguments, aborting');
@@ -23,18 +24,15 @@ client.on('ready', () => {
 
   // Allocate a map and map every command and its category (cmd.aliases[0])
   fields = new Map();
-
   client.commands.forEach((command) => {
     var category = command.group; // Category is always the first alias
     if (!all_cmds.hasOwnProperty(category))
       all_cmds[category] = []; // Allocate category before we add
 
     var string = util.format("``%s%s", config.prefix, command.name);
-    if (command.aliases != undefined && command.aliases.length > 0)
-      string = string.concat(util.format(", %s%s", config.prefix, command.aliases));
-    if ((command.usage) && command.usage.includes('<') && command.usage.includes('>'))
-      string = string.concat(util.format(" %s", command.usage));
-    string = string.concat(util.format("`` - %s", command.description));
+    string += ((command.aliases != undefined && command.aliases.length > 0) ? util.format(", %s%s", config.prefix, command.aliases) : "")
+    string += ((command.usage) && command.usage.includes('<') && command.usage.includes('>') ? util.format(" %s", command.usage) : "")
+    string += util.format("`` - %s", command.description);
 
     all_cmds[category].push(string);
   });
@@ -46,25 +44,31 @@ client.on('ready', () => {
     status: 'dnd'
   });
 
-  console.log('Ready as { %s }.', client.user.tag);
+  if (require('uws')) console.log(" * Established uWS module");
+  console.log(' * Ready as { %s%s%s } (Press CTRL+C to quit)', helper.Colors.FG_CYAN, client.user.tag, helper.Colors.FN_RESET);
 });
 
-//TODO: Setup project on github / gitlab
-//TODO: Sharding
-//TODO: Bot whois that shows its current shard / gateway
+//TODO: work on logger?
 //TODO: Helper.js and global bot state to share across shards
+//TODO: Sharding eventually
+//TODO: Bot whois that shows its current shard / gateway
+//TODO: Work on command system that deals with arguments better
+
 client.on('message', msg => {
   if (msg.author.bot || !msg.content.startsWith(config.prefix)) return;
 
+  const channel = msg.channel;
+
   var args = (msg.content.slice(config.prefix.length).trim().split(/ +/g));
-  var command = parseCommand(args[0].toLowerCase());
+  command = parseCommand(args[0].toLowerCase());
   args.splice(0, 1);
 
   if (command == undefined) {
-    msg.channel.send(util.format('Invalid command! Run ``%shelp`` to get a list of all commands.', config.prefix));
+    channel.send(invalidCommand());
     return;
   }
-  console.log((args) ? `client.on(msg) cmd issued: %s%s ${args}` : `client.on(m) cmd issued: %s%s`, config.prefix, command);
+
+  console.log((args) ? `client.on(msg) issued command: %s%s ${args}` : `client.on(m) issued command: %s%s`, config.prefix, command);
 
   try {
     if (command == 'help') {
@@ -77,25 +81,40 @@ client.on('message', msg => {
     } else
       client.commands.get(command).execute(msg, args);
   } catch (error) {
-    console.error('client.on(m) threw %s: %s', error.line, error);
-  }
-});
-
-var parseCommand = function(cmd) {
-  var str;
-  client.commands.forEach(command => {
-    if (command.aliases != undefined && command.aliases.indexOf(cmd) > -1) {
-      str = command.name;
+    if (error.includes('ArgError:')) {
+      channel.send(invalidArgument(error.split('ArgError:')[1]));
       return;
     }
 
-    if (command.name.indexOf(cmd) > -1) {
-      str = cmd;
+    (error.line) ? console.error('client.on(msg) threw %s: %s', error.line, error) : console.error('client.on(msg) threw: %s', error);
+  }
+});
+
+// return invalid command string
+function invalidCommand() {
+  return util.format('Invalid command! Run ``%shelp`` to get a list of valid commands.', config.prefix);
+}
+
+// return invalid argument string
+function invalidArgument(arg) {
+  return util.format('Argument ``%s`` %s. Run ``%shelp`` to get a list of valid arguments.', arg.split('|')[0], arg.split('|')[1], config.prefix);
+}
+
+function parseCommand(cmd) {
+  let exit = null;
+  client.commands.forEach((command) => {
+    if (command.name == cmd) {
+      exit = command.name;
+      return;
+    }
+
+    if (command.aliases != undefined && command.aliases.includes(cmd)) {
+      exit = command.name;
       return;
     }
   });
 
-  return str;
+  return exit;
 }
 
 String.prototype.replaceAll = function(search, replacement) {
