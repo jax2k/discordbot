@@ -13,10 +13,9 @@ module.exports = {
     var limit = parseInt(args[0]) + 1; // Add one because we ignore the command
     if (parseInt(args[0]) == 100 && limit == 101)
       limit--;
-    if (limit > 100) {
-      message.channel.send("Invalid argument, ``limit`` should be less than or equal to ``100``!");
-      return;
-    }
+
+    if (!limit) throw "ArgError: limit |is undefined";
+    if (limit > 100) throw "ArgError: limit |should be less than or equal to 100";
 
     message.channel.fetchMessages({
       limit: limit
