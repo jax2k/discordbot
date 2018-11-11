@@ -11,6 +11,7 @@
       "resolved": "https://registry.npmjs.org/async-limiter/-/async-limiter-1.0.0.tgz",
       "version": "1.0.0"
     },
+    "child_process": "^1.0.2",
     "config.json": "0.0.4",
     "discord.js": "^11.4.2",
     "discord.js-commando": "^0.10.0",

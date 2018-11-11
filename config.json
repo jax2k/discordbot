@@ -1,4 +1,6 @@
 {
   "ownerid": "160485934733852673",
-  "prefix": "+"
+  "prefix": "~",
+  "debug": true,
+  "trn-api-key": "c45c0959-35d0-4dda-942c-e3d1f4f22f06"
 }

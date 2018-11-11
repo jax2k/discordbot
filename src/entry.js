@@ -13,12 +13,30 @@ const fs = require('fs');
 const util = require('util');
 client.commands = new discord.Collection();
 
+require('config.json')('./config.json');
+if (config.debug && !args["d"]) {
+  const child_process = require('child_process');
+  console.log(" * Restarting bot in debug mode...");
+
+  var forkArgs = ['--inspect', '.'];
+  forkArgs.push("--t=" + args['t']);
+  forkArgs.push("--d=fbi.gov");
+
+  var subproc = child_process.spawnSync(process.argv.shift(), forkArgs, {
+    cwd: process.cwd(),
+    stdio: "inherit",
+    windowsHide: false
+  });
+
+  process.exit();
+}
+
 var all_cmds = {};
 client.on('ready', () => {
   if (require('config.json')('./config.json'))
     console.log(" * Sucessfully parsed config.json");
 
-  //TODO: Check against MD5 hashes to migate attack vector
+//TODO: Check against MD5 hashes to migate attack vector
   const cmds = fs.readdirSync('./src/commands/').filter(file => file.endsWith('.js'));
   for (const file of cmds) {
     const cmd = require(util.format('./commands/%s', file));
@@ -122,10 +140,5 @@ function parseCommand(cmd) {
 
   return exit;
 }
-
-String.prototype.replaceAll = function(search, replacement) {
-  var target = this;
-  return target.replace(new RegExp(search, 'g'), replacement);
-};
 
 client.login(args['t']);
