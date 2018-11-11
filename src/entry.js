@@ -15,10 +15,16 @@ client.commands = new discord.Collection();
 
 var all_cmds = {};
 client.on('ready', () => {
+  if (require('config.json')('./config.json'))
+    console.log(" * Sucessfully parsed config.json");
+
   //TODO: Check against MD5 hashes to migate attack vector
   const cmds = fs.readdirSync('./src/commands/').filter(file => file.endsWith('.js'));
   for (const file of cmds) {
     const cmd = require(util.format('./commands/%s', file));
+    if (cmd.name == undefined)
+      continue;
+
     client.commands.set(cmd.name, cmd);
   }
 
