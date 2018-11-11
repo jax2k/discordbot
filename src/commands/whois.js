@@ -1,4 +1,5 @@
 const discord = require('discord.js');
+const helper = require('./../helper.js');
 const util = require('util');
 const moment = require('moment');
 
@@ -29,7 +30,7 @@ module.exports = {
         embed.addField(`Created account on: `, moment(member.user.createdAt).format('MMM Do YYYY, h:mma'), true);
 
         var name = member.user.tag;
-          (member.nickname) ? name += ` (${member.nickname})` : name += "";
+        (member.nickname) ? name += ` (${member.nickname})`: name += "";
         embed.addField("Name: ", name, true);
 
         var r_fbi = [];
@@ -37,7 +38,28 @@ module.exports = {
           if (item.name != '@everyone')
             r_fbi.push(` ${item.toString()}`);
         embed.addField(`Roles: `, `{${r_fbi.toString()} }`, true);
+        var pres = "";
+        if (member.presence) {
+          let game = null;
+          if (member.presence.game)
+            game = member.presence.game;
 
+          var state = (game.state) ? game.state : "";
+          state = state.replaceAll(";", ",");
+
+          if (game == 'Spotify') pres += `Listening to \`\`${game.details}\`\` by \`\`${state}\`\` on \`\`${game.assets.largeText}\`\``;
+          else if (game != null)
+            pres += `Playing \`\`${game.name}\`\` - \`\`${game.details}\`\``;
+
+          embed.addField(`Presence: `, pres);
+        }
+
+        var status = member.presence.status;
+        if (status == ('online' || 'offline' || 'idle'))
+          status = member.presence.status.charAt(0).toUpperCase() + member.presence.status.slice(1);
+        else if (status == 'dnd')
+          status = "Do Not Disturb";
+        embed.addField(`Status: `, status);
 
         //TODO: Show users presence? (for high pop. servers)
         embed.setFooter(`.js - Issued by @${message.author.tag}`, message.author.avatarURL);
@@ -47,7 +69,3 @@ module.exports = {
 
   },
 };
-
-function hasNumber(myString) {
-  return /\d/.test(myString);
-}
