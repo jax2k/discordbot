@@ -1,0 +1,10 @@
+// bot status command
+// memory usage / total usage, guilds / total guilds, uptime using a startTime-now,
+
+// music bot - spot in song / total duration
+          // - check if it's not a meme by checking category for 'Music' or (Music) || (Music Video)
+          //   - use probablity to calculate?
+          // - reaction menu, would need to write framework
+          // - utilize threading
+
+// game stats command - r6, league, osu
