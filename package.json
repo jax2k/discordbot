@@ -24,7 +24,7 @@
       "resolved": "https://registry.npmjs.org/long/-/long-4.0.0.tgz",
       "version": "4.0.0"
     },
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "moment": "^2.22.2",
     "prism-media": {
       "integrity": "sha512-c9KkNifSMU/iXT8FFTaBwBMr+rdVcN+H/uNv1o+CuFeTThNZNTOrQ+RgXA1yL/DeLk098duAeRPP3QNPNbhxYQ==",
